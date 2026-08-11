@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+uploads/*
+vector_store/*
+!uploads/.gitkeep
+!vector_store/.gitkeep
