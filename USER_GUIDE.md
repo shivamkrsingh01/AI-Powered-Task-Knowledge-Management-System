@@ -14,8 +14,8 @@
 
 This is a task and knowledge management system with two user roles:
 
-- **Admin**: Can create tasks, upload documents, and view analytics
-- **User**: Can complete assigned tasks and search through uploaded documents
+- **Admin**: Can create tasks, upload documents, view analytics, and manage all tasks
+- **User**: Can complete assigned tasks, search documents, download documents, and add comments to tasks
 
 The system uses AI-powered semantic search to find relevant content in uploaded documents.
 
@@ -60,42 +60,58 @@ Three main tabs:
 ### Tasks Tab
 
 #### Create Task Section
-**What it does**: Allows you to assign work to users
+**What it does**: Allows you to assign work to users with priorities and due dates
 
 **Fields**:
 - **Title**: Name of the task (e.g., "Review policy document")
 - **Description**: Detailed instructions for the task
+- **Priority**: How urgent the task is (Low, Medium, High, Urgent)
+- **Due Date**: When the task should be completed (optional)
 - **Assign To**: Select which user should do this task
 
+**Priority Levels**:
+- **Low**: Can be done anytime
+- **Medium**: Standard priority
+- **High**: Should be done soon
+- **Urgent**: Needs immediate attention
+
 **What happens when you click "Create Task"**:
-- The task is saved to the database
+- The task is saved to the database with priority and due date
 - It appears in the tasks list below
 - The assigned user can now see it in their dashboard
 
 **Example workflow**:
 1. Enter title: "Read employee handbook"
 2. Enter description: "Review the updated employee handbook and acknowledge understanding"
-3. Select user: "Regular User"
-4. Click "Create Task"
-5. Task is now visible to the assigned user
+3. Select priority: "High"
+4. Select due date: "2024-12-31"
+5. Select user: "Regular User"
+6. Click "Create Task"
+7. Task is now visible to the assigned user with priority and due date
 
 #### Task List Section
 **What it shows**: All tasks with their details
 
 **Columns**:
-- **Title**: Task name
+- **Title**: Task name (click to view details and comments)
 - **Description**: Task details
+- **Priority**: Color-coded priority level
+- **Due Date**: When the task is due
 - **Assigned To**: Who is responsible
-- **Status**: Current state (pending/completed)
+- **Status**: Current state (pending/in_progress/completed/blocked/on_hold)
 
 **Filter Buttons**:
-- **All**: Shows all tasks
-- **Pending**: Shows only incomplete tasks
-- **Completed**: Shows only finished tasks
+- **Status Filters**: All, Pending, In Progress, Completed, Blocked, On Hold
+- **Priority Filters**: All, Urgent, High, Medium, Low
 
 **What happens when you click a filter**:
-- The list updates to show only tasks matching that status
+- The list updates to show only tasks matching that status/priority
 - Helps you focus on specific task states
+
+**What happens when you click a task title**:
+- A modal opens showing full task details
+- You can view and add comments
+- See task history and metadata
 
 ---
 
@@ -109,7 +125,7 @@ Three main tabs:
 **What happens when you upload a document**:
 1. The file is saved to the server
 2. Text is extracted from the document
-3. The text is split into smaller chunks
+3. The text is split into smaller chunks (sentence-aware)
 4. Each chunk is converted to a mathematical representation (embedding)
 5. These embeddings are stored for fast semantic search
 6. The document appears in the documents list
@@ -130,8 +146,11 @@ Three main tabs:
 - **Type**: File format (PDF/TXT)
 - **Uploaded By**: Who uploaded it
 - **Uploaded At**: Date of upload
+- **Action**: Download button
 
-**What happens**: You can see all available documents at a glance
+**What happens when you click Download**:
+- The document is downloaded to your computer
+- Activity is logged for analytics
 
 ---
 
@@ -162,9 +181,10 @@ Three main tabs:
 - **Logout button**: Signs you out and returns to login page
 
 ### Tab Navigation
-Two main tabs:
+Three main tabs:
 1. **My Tasks** - View and complete assigned tasks
-2. **Search Documents** - Search through uploaded documents
+2. **Documents** - View and download available documents
+3. **Search Documents** - Search through uploaded documents
 
 ---
 
@@ -174,33 +194,83 @@ Two main tabs:
 **What it shows**: Only tasks assigned to you
 
 **Columns**:
-- **Title**: Task name
+- **Title**: Task name (click to view details and add comments)
 - **Description**: Task details
-- **Status**: Current state (pending/completed)
-- **Action**: Button to complete the task
+- **Priority**: Color-coded priority level
+- **Due Date**: When the task is due
+- **Status**: Current state (pending/in_progress/completed/blocked/on_hold)
+- **Action**: Dropdown to change status
 
 **Filter Buttons**:
 - **All**: Shows all your tasks
 - **Pending**: Shows only incomplete tasks
+- **In Progress**: Shows tasks you're working on
 - **Completed**: Shows only finished tasks
+- **Blocked**: Shows tasks that are blocked
+- **On Hold**: Shows tasks on hold
 
-#### Mark Complete Button
-**What it does**: Changes task status from "pending" to "completed"
+#### Status Update Dropdown
+**What it does**: Allows you to change task status
 
-**When does it appear**: Only for tasks with "pending" status
+**Available options**:
+- **Pending**: Not started yet
+- **In Progress**: Currently working on it
+- **Completed**: Finished
+- **Blocked**: Can't proceed due to issues
+- **On Hold**: Temporarily paused
 
-**What happens when you click it**:
-- Task status changes to "completed"
-- The button disappears (can't complete twice)
+**What happens when you change status**:
+- Task status updates immediately
 - Admin sees the updated status in their dashboard
 - Task statistics are updated
 
 **Example workflow**:
 1. See task: "Read employee handbook" (status: pending)
-2. Read the handbook
-3. Click "Mark Complete"
-4. Task status changes to "completed"
-5. Admin sees you've finished the task
+2. Change status to "In Progress" when you start reading
+3. Change status to "Completed" when finished
+4. Admin sees your progress through status changes
+
+#### Task Details Modal
+**What it does**: Shows full task information and allows comments
+
+**What you can do**:
+- View complete task details (title, description, priority, due date, etc.)
+- Add comments to communicate with admin
+- View existing comments with author and timestamp
+- Delete your own comments
+
+**Example workflow**:
+1. Click on task title to open details modal
+2. Add comment: "I have a question about section 3"
+3. Admin can see your comment and respond
+4. Use comments to clarify task requirements
+
+---
+
+### Documents Tab
+
+#### Documents List Section
+**What it shows**: All uploaded documents available for download
+
+**Columns**:
+- **Filename**: Name of the uploaded file
+- **Type**: File format (PDF/TXT)
+- **Uploaded By**: Who uploaded it
+- **Uploaded At**: Date of upload
+- **Action**: Download button
+
+**What happens when you click Download**:
+- The document is downloaded to your computer
+- You can read it offline
+- Use it to complete your tasks
+
+**Example workflow**:
+1. Task: "Review security policy"
+2. Go to Documents tab
+3. Find "security_policy.pdf"
+4. Click Download
+5. Read the document
+6. Complete the task
 
 ---
 
@@ -216,8 +286,9 @@ Two main tabs:
 1. Your query is converted to a mathematical representation (embedding)
 2. The system compares it to all document chunks
 3. It finds the most similar chunks based on meaning, not just exact words
-4. Results are ranked by similarity score
-5. Top results are displayed with context
+4. Results are ranked by similarity score (percentage)
+5. Top 10 results are displayed with context
+6. Search is saved to history for quick re-search
 
 **Why this is powerful**: You can search using different words than what's in the document and still find relevant information.
 
@@ -225,13 +296,26 @@ Two main tabs:
 - Query: "How many vacation days do I get?"
 - Finds: Text about vacation policy even if it says "annual leave" instead of "vacation"
 
+#### Search History
+**What it does**: Shows your recent searches
+
+**What happens**:
+- Last 10 searches are saved
+- Click any search to re-run it
+- Avoids typing the same query repeatedly
+
+**Example workflow**:
+1. Search for "remote work policy"
+2. Later, click "remote work policy" in history to search again
+3. Quick access to your common searches
+
 #### Search Results Section
 **What it shows**: Relevant document chunks with context
 
 **For each result**:
 - **Filename**: Which document contains this information
-- **Similarity Score**: How closely it matches your query (0-1, higher is better)
-- **Content**: The actual text from the document
+- **Similarity Score**: How closely it matches your query (percentage, higher is better)
+- **Content**: The actual text from the document (highlighted in yellow)
 
 **What happens when you see results**:
 - You can read the relevant text
@@ -250,68 +334,88 @@ Two main tabs:
 
 ## Feature Explanations
 
-### Semantic Search vs. Traditional Search
+### Task Priorities
 
-**Traditional Search (Ctrl+F)**:
-- Only finds exact word matches
-- "Vacation" won't find "holiday" or "time off"
-- Misses relevant information with different wording
+**Why priorities matter**:
+- Helps users focus on urgent tasks first
+- Admins can see which tasks need attention
+- Better task management and planning
 
-**Semantic Search (This System)**:
-- Understands meaning and context
-- "Vacation" finds "holiday", "time off", "annual leave"
-- Finds relevant information even with different words
-- Uses AI to understand what you mean
+**Priority Levels**:
+- **Low** (green): Routine tasks
+- **Medium** (yellow): Standard priority
+- **High** (orange): Important tasks
+- **Urgent** (red): Critical tasks
 
-**Example**:
-- Query: "time off request process"
-- Finds: Text about "how to apply for leave" even without the words "time off"
+### Task Due Dates
 
-### Task Assignment Workflow
+**Why due dates matter**:
+- Sets clear deadlines
+- Helps with time management
+- Admins can track overdue tasks
 
-**Admin side**:
-1. Create task with title and description
-2. Assign to specific user
-3. Task appears in user's dashboard
+**How to use**:
+- Set due dates when creating tasks
+- Users can see when tasks are due
+- Sort tasks by due date to prioritize
 
-**User side**:
-1. See assigned task in "My Tasks"
-2. Complete the work
-3. Click "Mark Complete"
-4. Admin sees completion
+### Enhanced Task Statuses
 
-**Why this matters**: Clear accountability and tracking of work progress.
+**Why more statuses help**:
+- Better tracking of task progress
+- Clearer communication of task state
+- Identifies blocked tasks that need attention
 
-### Document Processing Pipeline
+**Status Options**:
+- **Pending**: Not started
+- **In Progress**: Currently working
+- **Completed**: Finished
+- **Blocked**: Can't proceed (needs attention)
+- **On Hold**: Temporarily paused
 
-**What happens when you upload a document**:
+### Task Comments
 
-1. **File Upload**: Document is saved to server
-2. **Text Extraction**:
-   - PDF: Text is extracted from each page
-   - TXT: Text is read directly
-3. **Chunking**: Text is split into smaller pieces (~800 characters)
-4. **Embedding Generation**: Each chunk is converted to a vector (mathematical representation)
-5. **Indexing**: Vectors are stored in FAISS index for fast search
-6. **Ready for Search**: Users can now query the document
+**Why comments matter**:
+- Enables collaboration on tasks
+- Allows clarification of requirements
+- Documents task-related discussions
 
-**Why chunking matters**: 
-- Makes search more precise (finds specific sections)
-- Allows showing context around matches
-- Improves search performance
+**How to use**:
+1. Click on task title to open details modal
+2. Type your comment in the text area
+3. Click "Add Comment"
+4. Comments show author and timestamp
+5. Delete your own comments if needed
 
-### Activity Logging
+### Improved Search
 
-**What gets logged**:
-- User logins
-- Document uploads
-- Search queries
-- Task status changes
+**Sentence-aware chunking**:
+- Documents are split at sentence boundaries
+- Better context in search results
+- More precise matching
 
-**Where it's used**:
-- Analytics tab shows most searched queries
-- Helps admins understand user behavior
-- Can be used to improve the system
+**More results**:
+- Shows 10 results instead of 5
+- Better coverage of relevant content
+- Higher chance of finding what you need
+
+**Search history**:
+- Saves your recent searches
+- Quick re-search with one click
+- Avoids repetitive typing
+
+### Document Download
+
+**Why download matters**:
+- Users can read documents offline
+- Reference documents while completing tasks
+- Better accessibility to knowledge base
+
+**How to use**:
+1. Go to Documents tab
+2. Find the document you need
+3. Click "Download" button
+4. Document saves to your computer
 
 ---
 
@@ -321,64 +425,82 @@ Two main tabs:
 
 **Admin Actions**:
 1. Upload employee handbook PDF
-2. Create task: "Read employee handbook" assigned to new employee
-3. Create task: "Complete security training" assigned to new employee
+2. Upload security training PDF
+3. Create task: "Read employee handbook" (High priority, due in 7 days)
+4. Create task: "Complete security training" (Urgent priority, due in 3 days)
 
 **User Actions**:
-1. See both tasks in "My Tasks"
-2. Search for "security training" to find relevant documents
+1. See both tasks in "My Tasks" with priorities and due dates
+2. Go to Documents tab and download handbook
 3. Read handbook sections
-4. Mark tasks as complete when done
+4. Add comment: "Section 3 is unclear"
+5. Admin responds with clarification
+6. Change status to "In Progress" when starting
+7. Change status to "Completed" when done
 
-**Result**: Admin can track onboarding progress through task completion.
+**Result**: Admin can track onboarding progress through task completion and comments.
 
 ### Example 2: Policy Update
 
 **Admin Actions**:
 1. Upload updated vacation policy PDF
-2. Create task: "Review new vacation policy" assigned to all users
+2. Create task: "Review new vacation policy" (High priority, due in 5 days) assigned to all users
 3. Monitor analytics to see if users search for vacation info
 
 **User Actions**:
-1. See task in "My Tasks"
-2. Search "vacation days" to find new policy
-3. Read updated policy
-4. Mark task complete
+1. See task in "My Tasks" with due date
+2. Go to Documents tab and download new policy
+3. Search "vacation days" to find specific sections
+4. Read updated policy
+5. Add comment: "Policy is clear"
+6. Mark task complete
 
-**Result**: Everyone is informed about policy changes systematically.
+**Result**: Everyone is informed about policy changes systematically with feedback.
 
 ### Example 3: Research Task
 
 **Admin Actions**:
 1. Upload multiple research documents (PDFs)
-2. Create task: "Research competitor pricing" assigned to user
+2. Create task: "Research competitor pricing" (Medium priority, due in 10 days) assigned to user
 
 **User Actions**:
-1. Search for "pricing" across all documents
-2. Review results showing pricing information from various docs
-3. Use information to complete research task
-4. Mark task complete
+1. See task with priority and due date
+2. Download relevant documents from Documents tab
+3. Search for "pricing" across all documents
+4. Review results showing pricing information from various docs
+5. Use information to complete research task
+6. Change status from "Pending" → "In Progress" → "Completed"
+7. Add comments about findings
 
-**Result**: User can efficiently find information across multiple documents.
+**Result**: User can efficiently find information across multiple documents with progress tracking.
 
 ---
 
 ## Tips for Effective Use
 
 ### For Admins
+- **Set appropriate priorities**: Help users know what to focus on first
+- **Use due dates**: Set clear deadlines for better planning
 - **Upload documents first**: Users need documents to search before they can complete research tasks
 - **Create clear task descriptions**: Help users understand exactly what needs to be done
 - **Use analytics**: Check what users are searching for to identify knowledge gaps
 - **Assign appropriately**: Give tasks to users who have the right context
+- **Monitor task comments**: Respond to user questions and clarifications
 
 ### For Users
+- **Check priorities**: Focus on urgent and high-priority tasks first
+- **Watch due dates**: Complete tasks before deadlines
+- **Download documents**: Download relevant documents for offline reference
 - **Use natural language**: Search like you would ask a question
 - **Try different phrasings**: If one search doesn't work, try synonyms
+- **Use search history**: Click recent searches to re-run them quickly
+- **Update task status**: Keep status current so admin knows your progress
+- **Add comments**: Ask questions or provide updates on tasks
 - **Read context**: Search results show the surrounding text for better understanding
-- **Complete tasks promptly**: Helps admins track progress
 
 ### For Both
-- **Filter tasks**: Use status filters to focus on what's relevant
+- **Filter tasks**: Use status and priority filters to focus on what's relevant
+- **Use task details**: Click task titles to see full information and add comments
 - **Logout when done**: Keeps your account secure
 - **Provide feedback**: If search isn't working well, try different query terms
 
@@ -402,14 +524,27 @@ Two main tabs:
 - **Cause**: Wrong credentials
 - **Solution**: Check email and password, ask admin for correct credentials
 
+### Can't download documents
+- **Cause**: Documents tab not selected
+- **Solution**: Click "Documents" tab to see available documents
+
+### Comments not appearing
+- **Cause**: Need to refresh or reopen task details
+- **Solution**: Close and reopen the task details modal
+
+### Search history not showing
+- **Cause**: No searches performed yet
+- **Solution**: Perform a search to populate history
+
 ---
 
 ## Summary
 
 This system helps teams:
-- **Assign and track work** through tasks
-- **Share knowledge** through document uploads
-- **Find information quickly** through semantic search
+- **Assign and track work** through tasks with priorities and due dates
+- **Share knowledge** through document uploads and downloads
+- **Find information quickly** through improved semantic search with history
+- **Collaborate on tasks** through comments
 - **Monitor usage** through analytics
 
 **Key benefit**: Combines task management with intelligent document search, making it easier to complete work that requires research or reference materials.
