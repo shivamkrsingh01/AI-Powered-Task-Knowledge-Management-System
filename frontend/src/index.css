@@ -162,9 +162,51 @@ table th {
   color: #856404;
 }
 
+.status-in_progress {
+  background: #cce5ff;
+  color: #004085;
+}
+
 .status-completed {
   background: #d4edda;
   color: #155724;
+}
+
+.status-blocked {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-on_hold {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.priority-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.priority-low {
+  background: #d4edda;
+  color: #155724;
+}
+
+.priority-medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.priority-high {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.priority-urgent {
+  background: #dc3545;
+  color: white;
 }
 
 .search-result {

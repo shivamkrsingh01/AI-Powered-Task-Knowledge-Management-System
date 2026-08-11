@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.routers import auth, tasks, documents, search, analytics
+from app.routers import auth, tasks, documents, search, analytics, task_comments
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -23,6 +23,7 @@ app.include_router(tasks.router)
 app.include_router(documents.router)
 app.include_router(search.router)
 app.include_router(analytics.router)
+app.include_router(task_comments.router)
 
 
 @app.get("/")

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { tasksAPI, documentsAPI, analyticsAPI } from '../services/api';
+import TaskDetails from '../components/TaskDetails';
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -11,12 +12,15 @@ const AdminDashboard = () => {
   const [analytics, setAnalytics] = useState(null);
   const [activeTab, setActiveTab] = useState('tasks');
   const [error, setError] = useState('');
+  const [selectedTask, setSelectedTask] = useState(null);
   
   // Task form state
   const [taskForm, setTaskForm] = useState({
     title: '',
     description: '',
     assigned_to: '',
+    priority: 'medium',
+    due_date: '',
   });
   
   // File upload state
@@ -55,8 +59,9 @@ const AdminDashboard = () => {
       await tasksAPI.createTask({
         ...taskForm,
         assigned_to: parseInt(taskForm.assigned_to),
+        due_date: taskForm.due_date || null,
       });
-      setTaskForm({ title: '', description: '', assigned_to: '' });
+      setTaskForm({ title: '', description: '', assigned_to: '', priority: 'medium', due_date: '' });
       fetchData();
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to create task');
@@ -86,14 +91,32 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDownloadDocument = async (documentId, filename) => {
+    try {
+      const response = await documentsAPI.downloadDocument(documentId);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setError('Failed to download document');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleFilterTasks = async (status) => {
+  const handleFilterTasks = async (status, priority) => {
     try {
-      const res = await tasksAPI.getTasks(status ? { status } : {});
+      const params = {};
+      if (status) params.status = status;
+      if (priority) params.priority = priority;
+      const res = await tasksAPI.getTasks(params);
       setTasks(res.data);
     } catch (err) {
       setError('Failed to filter tasks');
@@ -174,6 +197,23 @@ const AdminDashboard = () => {
                   onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
                   rows="3"
                 />
+                <label>Priority</label>
+                <select
+                  value={taskForm.priority}
+                  onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
+                  required
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+                <label>Due Date</label>
+                <input
+                  type="date"
+                  value={taskForm.due_date}
+                  onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
+                />
                 <label>Assign To</label>
                 <select
                   value={taskForm.assigned_to}
@@ -195,14 +235,42 @@ const AdminDashboard = () => {
 
             <div className="card">
               <div style={{ marginBottom: '15px' }}>
-                <button className="btn" onClick={() => handleFilterTasks(null)}>
+                <span style={{ marginRight: '10px', fontWeight: 'bold' }}>Status:</span>
+                <button className="btn" onClick={() => handleFilterTasks(null, null)}>
                   All
                 </button>
-                <button className="btn" onClick={() => handleFilterTasks('pending')}>
+                <button className="btn" onClick={() => handleFilterTasks('pending', null)}>
                   Pending
                 </button>
-                <button className="btn" onClick={() => handleFilterTasks('completed')}>
+                <button className="btn" onClick={() => handleFilterTasks('in_progress', null)}>
+                  In Progress
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks('completed', null)}>
                   Completed
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks('blocked', null)}>
+                  Blocked
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks('on_hold', null)}>
+                  On Hold
+                </button>
+              </div>
+              <div style={{ marginBottom: '15px' }}>
+                <span style={{ marginRight: '10px', fontWeight: 'bold' }}>Priority:</span>
+                <button className="btn" onClick={() => handleFilterTasks(null, null)}>
+                  All
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks(null, 'urgent')}>
+                  Urgent
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks(null, 'high')}>
+                  High
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks(null, 'medium')}>
+                  Medium
+                </button>
+                <button className="btn" onClick={() => handleFilterTasks(null, 'low')}>
+                  Low
                 </button>
               </div>
               <h3>Tasks</h3>
@@ -214,6 +282,8 @@ const AdminDashboard = () => {
                     <tr>
                       <th>Title</th>
                       <th>Description</th>
+                      <th>Priority</th>
+                      <th>Due Date</th>
                       <th>Assigned To</th>
                       <th>Status</th>
                     </tr>
@@ -221,8 +291,21 @@ const AdminDashboard = () => {
                   <tbody>
                     {tasks.map((task) => (
                       <tr key={task.id}>
-                        <td>{task.title}</td>
+                        <td>
+                          <button
+                            onClick={() => setSelectedTask(task)}
+                            style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+                          >
+                            {task.title}
+                          </button>
+                        </td>
                         <td>{task.description || '-'}</td>
+                        <td>
+                          <span className={`priority-badge priority-${task.priority}`}>
+                            {task.priority}
+                          </span>
+                        </td>
+                        <td>{task.due_date ? new Date(task.due_date).toLocaleDateString() : '-'}</td>
                         <td>{task.assigned_to_name || '-'}</td>
                         <td>
                           <span className={`status-badge status-${task.status}`}>
@@ -266,6 +349,7 @@ const AdminDashboard = () => {
                       <th>Type</th>
                       <th>Uploaded By</th>
                       <th>Uploaded At</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -275,6 +359,15 @@ const AdminDashboard = () => {
                         <td>{doc.file_type}</td>
                         <td>{doc.uploaded_by_name || '-'}</td>
                         <td>{new Date(doc.created_at).toLocaleDateString()}</td>
+                        <td>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleDownloadDocument(doc.id, doc.filename)}
+                            style={{ padding: '5px 10px', fontSize: '12px' }}
+                          >
+                            Download
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -310,6 +403,14 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+      
+      {selectedTask && (
+        <TaskDetails
+          task={selectedTask}
+          currentUserId={user.id}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </div>
   );
 };

@@ -59,16 +59,27 @@ export const documentsAPI = {
         'Content-Type': 'multipart/form-data',
       },
     }),
+  downloadDocument: (documentId) =>
+    api.get(`/api/documents/${documentId}/download`, { responseType: 'blob' }),
 };
 
 export const searchAPI = {
-  search: (query) =>
-    api.post('/api/search', { query }),
+  search: (query, k = 10) =>
+    api.post('/api/search', { query, k }),
 };
 
 export const analyticsAPI = {
   getAnalytics: () =>
     api.get('/api/analytics'),
+};
+
+export const taskCommentsAPI = {
+  getComments: (taskId) =>
+    api.get(`/api/tasks/${taskId}/comments`),
+  createComment: (taskId, content) =>
+    api.post(`/api/tasks/${taskId}/comments`, { content }),
+  deleteComment: (taskId, commentId) =>
+    api.delete(`/api/tasks/${taskId}/comments/${commentId}`),
 };
 
 export default api;

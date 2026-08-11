@@ -42,19 +42,35 @@ def extract_text(file_path: str, file_type: str) -> str:
         raise ValueError(f"Unsupported file type: {file_type}")
 
 
-def chunk_text(text: str, chunk_size: int = 800, overlap: int = 100) -> List[str]:
+def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
+    """Split text into chunks respecting sentence boundaries for better context"""
+    import re
+    
+    # Split into sentences first
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    
     chunks = []
-    start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunk = text[start:end]
-        if chunk.strip():
-            chunks.append(chunk.strip())
-        start = end - overlap
+    current_chunk = ""
+    
+    for sentence in sentences:
+        # If adding this sentence would exceed chunk size, save current chunk
+        if len(current_chunk) + len(sentence) > chunk_size and current_chunk:
+            chunks.append(current_chunk.strip())
+            # Start new chunk with overlap from previous chunk
+            words = current_chunk.split()
+            overlap_words = words[-min(len(words), overlap // 5):]  # Approximate overlap
+            current_chunk = " ".join(overlap_words) + " " if overlap_words else ""
+        
+        current_chunk += sentence + " "
+    
+    # Add remaining content
+    if current_chunk.strip():
+        chunks.append(current_chunk.strip())
+    
     return chunks
 
 
-def save_uploaded_file(file: UploadFile, user_id: int) -> Document:
+def save_uploaded_file(file: UploadFile, user_id: int) -> tuple:
     # Validate file type
     file_type = validate_file_type(file.filename)
     
@@ -91,3 +107,7 @@ def create_document_record(
 
 def get_all_documents(db: Session) -> List[Document]:
     return db.query(Document).all()
+
+
+def get_document_by_id(db: Session, document_id: int) -> Document | None:
+    return db.query(Document).filter(Document.id == document_id).first()

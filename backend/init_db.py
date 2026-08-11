@@ -55,10 +55,13 @@ def init_db():
         
         # Create sample tasks
         if db.query(Task).count() == 0:
+            from datetime import date, timedelta
             task1 = Task(
                 title="Read employee policy",
                 description="Review the employee policy document",
                 status="pending",
+                priority="medium",
+                due_date=date.today() + timedelta(days=7),
                 assigned_to=regular_user.id,
                 created_by=admin_user.id
             )
@@ -66,6 +69,8 @@ def init_db():
                 title="Complete security training",
                 description="Finish the annual security training module",
                 status="pending",
+                priority="high",
+                due_date=date.today() + timedelta(days=3),
                 assigned_to=regular_user.id,
                 created_by=admin_user.id
             )

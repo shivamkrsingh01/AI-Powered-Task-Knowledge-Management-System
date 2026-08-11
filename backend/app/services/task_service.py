@@ -11,7 +11,9 @@ def create_task(db: Session, task: TaskCreate, created_by_id: int) -> Task:
         description=task.description,
         assigned_to=task.assigned_to,
         created_by=created_by_id,
-        status="pending"
+        status="pending",
+        priority=task.priority,
+        due_date=task.due_date
     )
     db.add(db_task)
     db.commit()
@@ -23,7 +25,8 @@ def get_tasks(
     db: Session,
     user_id: Optional[int] = None,
     status: Optional[str] = None,
-    assigned_to: Optional[int] = None
+    assigned_to: Optional[int] = None,
+    priority: Optional[str] = None
 ) -> List[Task]:
     query = db.query(Task)
     
@@ -37,6 +40,9 @@ def get_tasks(
     if assigned_to is not None:
         query = query.filter(Task.assigned_to == assigned_to)
     
+    if priority is not None:
+        query = query.filter(Task.priority == priority)
+    
     return query.all()
 
 
@@ -44,7 +50,7 @@ def get_task_by_id(db: Session, task_id: int) -> Task | None:
     return db.query(Task).filter(Task.id == task_id).first()
 
 
-def update_task_status(db: Session, task_id: int, status: str, user_id: int) -> Task | None:
+def update_task_status(db: Session, task_id: int, task_update: TaskUpdate, user_id: int) -> Task | None:
     task = db.query(Task).filter(Task.id == task_id).first()
     
     if not task:
@@ -54,7 +60,14 @@ def update_task_status(db: Session, task_id: int, status: str, user_id: int) -> 
     if task.assigned_to != user_id:
         return None
     
-    task.status = status
+    # Update only provided fields
+    if task_update.status is not None:
+        task.status = task_update.status
+    if task_update.priority is not None:
+        task.priority = task_update.priority
+    if task_update.due_date is not None:
+        task.due_date = task_update.due_date
+    
     db.commit()
     db.refresh(task)
     return task

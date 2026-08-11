@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import Optional
 from app.core.database import get_db
 from app.schemas.search import SearchRequest, SearchResponse
 from app.services.search_service import search_documents
@@ -22,13 +23,18 @@ def search_endpoint(
             detail="Search query cannot be empty"
         )
     
-    results = search_documents(request.query, k=5)
+    # Use k from request or default to 10
+    k = request.k if request.k is not None else 10
+    # Limit k to reasonable range
+    k = min(max(k, 1), 20)
+    
+    results = search_documents(request.query, k=k)
     
     # Log search activity
     log = ActivityLog(
         user_id=current_user.id,
         action="SEARCH",
-        details=f"Search query: {request.query}"
+        details=f"Search query: {request.query}, Results: {len(results)}"
     )
     db.add(log)
     db.commit()

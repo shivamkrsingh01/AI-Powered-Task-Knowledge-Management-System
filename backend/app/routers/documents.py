@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
@@ -6,7 +7,8 @@ from app.schemas.document import DocumentResponse
 from app.services.document_service import (
     save_uploaded_file,
     create_document_record,
-    get_all_documents
+    get_all_documents,
+    get_document_by_id
 )
 from app.services.search_service import process_document_for_search
 from app.dependencies.auth import get_current_user, require_admin
@@ -74,3 +76,33 @@ def get_documents(
         )
         for doc in documents
     ]
+
+
+@router.get("/{document_id}/download")
+def download_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    document = get_document_by_id(db, document_id)
+    
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found"
+        )
+    
+    # Log document download
+    log = ActivityLog(
+        user_id=current_user.id,
+        action="DOCUMENT_DOWNLOAD",
+        details=f"Downloaded document: {document.filename}"
+    )
+    db.add(log)
+    db.commit()
+    
+    return FileResponse(
+        document.file_path,
+        filename=document.filename,
+        media_type='application/octet-stream'
+    )

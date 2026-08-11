@@ -3,3 +3,4 @@ from app.models.user import User
 from app.models.document import Document
 from app.models.task import Task
 from app.models.activity_log import ActivityLog
+from app.models.task_comment import TaskComment

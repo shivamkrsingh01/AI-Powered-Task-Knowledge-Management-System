@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -11,6 +11,8 @@ class Task(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     status = Column(String(50), nullable=False, default="pending")
+    priority = Column(String(20), nullable=False, default="medium")
+    due_date = Column(Date, nullable=True)
     assigned_to = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
