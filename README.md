@@ -4,6 +4,8 @@ A minimal AI-powered task and knowledge management system MVP with semantic sear
 
 ## Project Description
 
+View:- https://drive.google.com/drive/folders/1byd-odJl_XVxnrI4mOUUIvHyjFl29-L6?usp=sharing
+
 This is a working MVP that demonstrates:
 - JWT-based authentication with role-based access control (RBAC)
 - Task management with assignment and status tracking
